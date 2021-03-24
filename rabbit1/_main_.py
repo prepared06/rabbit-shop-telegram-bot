@@ -70,9 +70,9 @@ async def show_orders(message: types.Message):
     id = message.from_user.id
     res = db.get_product_list(id)
     if(res):
-        await message.answer("You have this products in your bag:")
-        for i in range(len(res)):
-            await message.answer(res[i])
+    await message.answer("You have this products in your bag:")
+    for i in range(len(res)):
+        await message.answer(res[i])
             price += int(db.get_price(res[i]))
         await message.answer("Total price is " + str(price) + " hottabych coins\nYou can buy it now using /buy")
     else:
@@ -87,8 +87,8 @@ async def buy(message: types.Message):
     id = message.from_user.id
     res = db.get_product_list(id)
     if(res):
-        db.delete_orders_by_id_user(id)
-        await message.answer("You just buyes all this stuff successful")
+    db.delete_orders_by_id_user(id)
+    await message.answer("You just buyes all this stuff successful")
     else:
         await message.answer("Your bag is empty now! Try to /add something to your order.")
 
