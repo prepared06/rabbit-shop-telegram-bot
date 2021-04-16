@@ -83,3 +83,25 @@ class DBManage:
         sql_request = "DELETE FROM orders_table WHERE user_who_order = " + str(id_user)
         self.cursorDB.execute(sql_request)
         self.db.commit()
+#1th get all id
+    def get_list_of_elements_from_products(self):
+
+        list_of_id_products = list()
+
+        #sql_request = "SELECT id FROM products_table;"
+
+        sql_request = "SELECT * FROM rabbit_schema.products_table;"
+
+        self.cursorDB.execute(sql_request)
+        resultRQST = self.cursorDB.fetchall()
+        
+        #get all id products
+        #for a in range(len(resultRQST)):  
+        #    lol = resultRQST[a][0]
+        #    list_of_id_products.append(lol)
+
+        return resultRQST
+
+    #get name from id
+
+    #get price from id
