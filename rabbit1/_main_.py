@@ -7,7 +7,7 @@ from aiogram.types import ReplyKeyboardRemove, \
 from aiogram.types import CallbackQuery
 
 #config
-from config import API_TOKEN
+from config import API_TOKEN, id_manager
 
 
 # Configure logging
@@ -21,15 +21,6 @@ dp = Dispatcher(bot)
 
 db = DBManage()
 
-commands = """
-    /products - type it if you wanna get available products
-    /add - to add to your bag some product type /add product name
-           for exemple: \"/add potatto\"
-    /show - to see your order type it
-    /buy - to make payment type it
-
-     also if you wanna check price you must just write name of product
-"""
 #buttons
 inline_btn_products = InlineKeyboardButton('Products', callback_data='products')
 inline_btn_shopping_cart = InlineKeyboardButton('Shopping cart', callback_data='shopping_cart')
@@ -43,33 +34,28 @@ product_menu_keyboard = InlineKeyboardMarkup()
 shopping_cart_menu = InlineKeyboardMarkup().add(inline_btn_make_order).add(inline_btn_clear_all_shopping_cart).add(inline_btn_back_to_main_menu)
 
 
-
+#
 @dp.message_handler(commands=['help'])
 async def help_info(message: types.Message):
-    await message.answer("We have this commands:\n" + commands)
+    await message.answer("Bot-online shop will help you to make order.")
 
 @dp.message_handler(commands=['start'])
-async def send_welcome(message: types.Message):
-    """
-    This handler will be called when user sends `/start` or `/help` command
-    """    
+async def send_welcome(message: types.Message):     
     if(db.subscriber_exists(message.from_user.id)):        
         await message.answer("Hi, " + message.from_user.first_name + \
-           ". We had a meeting already.\nTry to /help\n Also we you can use menu buttons",\
+           ". We had a meeting already.",\
            reply_markup = inline_menu_keyboard)
     else:
         db.add_subscriber(message.from_user.id, message.from_user.full_name )    
         await message.reply("Hi! "+ message.from_user.first_name +"\nI'm shop bot, you can buy some products using me. Just choose what you want in menu!", \
            reply_markup = inline_menu_keyboard)
  
-
 #handler for button "products" from main menu
 @dp.callback_query_handler(lambda k: k.data == "products")
 async def send_products_list(callback_query: CallbackQuery):  
     
     list_of_products = db.get_list_of_elements_from_products()#list with tuplets (id, products name, price)
 
-    
     product_menu_keyboard = InlineKeyboardMarkup()
 
     for a in range(len(list_of_products)):
@@ -94,9 +80,9 @@ async def products_id_handler(callback_query: CallbackQuery):
 #handler for shoping cart  button
 @dp.callback_query_handler(lambda k: k.data == "shopping_cart")
 async def shoping_cart(callback_query: CallbackQuery):
-    price = 0
     id = callback_query.from_user.id
     res = db.get_product_list(id)
+    price = 0
     answer_str = "In your shoping cart is/are next position: "
     if(res):
         for i in range(len(res)):
@@ -111,14 +97,21 @@ async def shoping_cart(callback_query: CallbackQuery):
     await bot.send_message(callback_query.from_user.id, answer_str, reply_markup = shopping_cart_menu )
 
 #handler for maker order(delete order drom db + send message to manager)
-#NEED ADD SENDING METHOD!
 @dp.callback_query_handler(lambda k: k.data == "make_order")
 async def make_order(callback_query: CallbackQuery):
     id = callback_query.from_user.id
     res = db.get_product_list(id)
+    price = 0
+    list_product_str = ""
     await bot.answer_callback_query(callback_query.id)
     if(res):
-        db.delete_orders_by_id_user(id)
+        db.delete_orders_by_id_user(id)      
+        for i in range(len(res)):
+            list_product_str = list_product_str + res[i] +", "
+            price += int(db.get_price(res[i]))
+        text_for_manager = "User " + callback_query.from_user.full_name + " with id " + str(callback_query.from_user.id) + " just \
+made order. Customers order: " +  list_product_str + ". Total price: " + str(price)  + " hottabych coins"
+        await bot.send_message(id_manager, text_for_manager)
         await bot.send_message(id, "We sended message to our manager. He will contact with you soon. Thank you for using our service!", reply_markup = inline_menu_keyboard)
     else:
         await bot.send_message(id, "Your shoping cart is empty now! Try to add something to your order.", reply_markup = product_menu_keyboard)

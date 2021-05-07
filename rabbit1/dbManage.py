@@ -18,39 +18,14 @@ class DBManage:
         self.cursorDB.execute("INSERT INTO rabbit_table (user_id, user_name) VALUES(%s,%s)", (user_id,user_name))
         self.db.commit()
 
-   
     def subscriber_exists(self, user_id):
         sql_request = 'SELECT * FROM rabbit_table WHERE user_id = ' + str(user_id)
         self.cursorDB.execute(sql_request)
         result = self.cursorDB.fetchall()
-       
-        #self.cursorDB.close()
         return bool(len(result))
-
-    def get_column(self, table_name, column_name):
-        #self.cursorDB.execute('SELECT %s FROM %s', (column_name, table_name))
-        sql_request = 'SELECT ' + table_name + ' FROM ' + column_name
-        self.cursorDB.execute(sql_request)
-        resultRQST = self.cursorDB.fetchall()
-        resultSTR = str(resultRQST).replace("[('","").replace("',)]","").replace("',)","").replace(" ('"," ")
-        return resultSTR
 
     def get_price(self, products_name):
         sql_request = 'SELECT price FROM products_table WHERE products_name = \'' + products_name + '\''
-        self.cursorDB.execute(sql_request)
-        resultRQST = self.cursorDB.fetchall()
-        resultSTR = str(resultRQST).replace("[(","").replace(",)]","")
-        return resultSTR
-
-    def product_exist(self, products_name):
-        sql_request = 'SELECT products_name FROM products_table WHERE products_name = \'' + products_name + '\''
-        self.cursorDB.execute(sql_request)
-        resultRQST = self.cursorDB.fetchall()
-        resultSTR = str(resultRQST).replace("[('","").replace("',)]","")
-        return (resultSTR == products_name)
-
-    def get_product_id(self, products_name):
-        sql_request = 'SELECT id FROM products_table WHERE products_name = \'' + products_name + '\''
         self.cursorDB.execute(sql_request)
         resultRQST = self.cursorDB.fetchall()
         resultSTR = str(resultRQST).replace("[(","").replace(",)]","")
@@ -83,25 +58,12 @@ class DBManage:
         sql_request = "DELETE FROM orders_table WHERE user_who_order = " + str(id_user)
         self.cursorDB.execute(sql_request)
         self.db.commit()
-#1th get all id
+
     def get_list_of_elements_from_products(self):
-
         list_of_id_products = list()
-
-        #sql_request = "SELECT id FROM products_table;"
-
         sql_request = "SELECT * FROM rabbit_schema.products_table;"
-
         self.cursorDB.execute(sql_request)
         resultRQST = self.cursorDB.fetchall()
-        
-        #get all id products
-        #for a in range(len(resultRQST)):  
-        #    lol = resultRQST[a][0]
-        #    list_of_id_products.append(lol)
-
         return resultRQST
 
-    #get name from id
-
-    #get price from id
+   
